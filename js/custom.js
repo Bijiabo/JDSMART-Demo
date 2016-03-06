@@ -5,6 +5,69 @@ $(function(){
         keysContainerQueryString = "#keys-container";
 
     ARC = new _AnnulusRemoteController(keyboardQueryString, keysContainerQueryString);
+
+    var keyTapCount = {
+        up: 0,
+        right: 0,
+        down: 0,
+        left: 0,
+        center: 0
+    };
+
+    var channel = 0,
+        maxChannel = 10,
+        volume = 0;
+    var changeChannel = function(change) {
+        if (channel + change >= 0 && channel + change <= maxChannel) {
+            channel += change;
+        } else if (channel + change > maxChannel) {
+            channel = 0;
+        } else {
+            channel = maxChannel;
+        }
+        showTip("Channel " + channel);
+    };
+    var changeVolume = function(change) {
+        if (volume + change >= 0) {
+            volume += change;
+        }
+        showTip("Volume " + volume);
+    };
+
+    var playState = true;
+    var togglePlayState = function() {
+        playState = !playState;
+        showTip(playState ? "Play" : "Pause");
+    };
+
+    var showTip = function(text) {
+        $("#indicator").text(text);
+    };
+
+    ARC.setTapFunction(function(keyName){
+        //keyTapCount[keyName] += 1;
+        //$("#indicator").text(keyName + " " + keyTapCount[keyName]);
+
+        switch (keyName) {
+            case "up":
+                changeChannel(1);
+                break;
+            case "down":
+                changeChannel(-1);
+                break;
+            case "left":
+                changeVolume(-1);
+                break;
+            case "right":
+                changeVolume(1);
+                break;
+            case "center":
+                togglePlayState();
+                break;
+            default:
+                break;
+        }
+    });
 });
 
 var _AnnulusRemoteController = function(keyboardQueryString, keysContainerQueryString) {
@@ -15,6 +78,8 @@ var _AnnulusRemoteController = function(keyboardQueryString, keysContainerQueryS
         end: (new Date()).getTime(), //触摸结束时间, 同上
         duration: 0 //触摸持续时间
     };
+
+    this.intervalTime = 500; //间隔定时器默认间隔时间,默认为500ms
 
     this.keyboardQueryString = keyboardQueryString;
     this.keyboardElement = $(this.keyboardQueryString);
@@ -32,19 +97,26 @@ var _AnnulusRemoteController = function(keyboardQueryString, keysContainerQueryS
     this.activeButtonStatusClassName = "active"; //活跃按钮 CSS 类名
     this.currentActiveButtonKeyName = ""; //当前活跃按钮的按键名
 
-    // bind events
+    // MARK: - bind events
 
     $(document).on(this.touchAction.start, keyboardQueryString, function(event){
         self.updateTouchAction(self.touchAction.start);
         var element = $(this);
         self.updateCurrentTouchButton(element, event);
+        self.intervalID = setInterval(function(){self.timer(self);}, self.intervalTime);
     });
 
     $(document).on(this.touchAction.end, keyboardQueryString, function(event){
         self.updateTouchAction(self.touchAction.end);
-        var element = $(this);
-        //self.updateCurrentTouchButton(element, event);
         self.clearCurrentActiveButtonState();
+
+        if (self.touchTime.duration<=200) { // tap
+            self.tapFunction(self.currentActiveButtonKeyName);
+        } else { // touch down and moved
+
+        }
+
+        clearInterval(self.intervalID);
     });
 
     $(document).on(this.touchAction.move, keyboardQueryString, function(event){
@@ -52,6 +124,25 @@ var _AnnulusRemoteController = function(keyboardQueryString, keysContainerQueryS
         self.updateCurrentTouchButton(element, event);
     });
 
+    this.tapFunction = function(keyName){
+        console.log(new Date());
+        console.log("Default tap function. KeyName:"+keyName);
+    };
+
+};
+
+_AnnulusRemoteController.prototype.timer = function(self) {
+    /*
+     * 间隔定时器,用于捕获长按事件
+     */
+    self.tapFunction(self.currentActiveButtonKeyName);
+};
+
+_AnnulusRemoteController.prototype.setTapFunction = function(func) {
+    /*
+     * 设定点击事件
+     */
+    this.tapFunction = func;
 };
 
 _AnnulusRemoteController.prototype.touchAction = {
@@ -85,11 +176,7 @@ _AnnulusRemoteController.prototype.setStatusToActiveForButtonByKeyName = functio
 
     var targetButton = this.buttonForKeyName(keyName);
 
-    if (targetButton.length===0) {
-        p("targetButton length => 0");
-        return;
-    }
-
+    if (targetButton.length===0) {return;}
     if (this.isActiveForButton(targetButton)) {return;}
 
     this.clearCurrentActiveButtonState();
@@ -111,7 +198,6 @@ _AnnulusRemoteController.prototype.clearCurrentActiveButtonState = function() {
 
 _AnnulusRemoteController.prototype.updateCurrentTouchButton = function(element, event) {
     event.preventDefault();
-    //console.log(event);
 
     var elementCenter = {
         x: element.width()/2,
