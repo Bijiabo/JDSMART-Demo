@@ -1,13 +1,19 @@
 $(function(){
 
+    var keyboardQueryString = "#direction-keyboard",
+        keyboardElement = $(keyboardQueryString),
+        keysContainer = $("#keys-container");
+
     var keysContainerPosition = {
-        top: $("#keys-container").offset().top,
-        left: $("#keys-container").offset().left
+        top: keyboardElement.offset().top,
+        left: keyboardElement.offset().left
     };
+
+    var keysContainerRadius = keysContainer.width()/2;
 
     var centerKeyRadius = $(".center-key").width()/2;
 
-    $(document).on("mousemove", "#keys-container", function(event){
+    $(document).on("mousemove", keyboardQueryString, function(event){
         var element = $(this);
         var elementCenter = {
             x: element.width()/2,
@@ -19,10 +25,10 @@ $(function(){
         };
         var distanceToCenter = Math.sqrt( Math.pow(currentTargetPosition.x - elementCenter.x, 2) + Math.pow(currentTargetPosition.y - elementCenter.y, 2) );
         var angleToCenter = Math.atan2(elementCenter.y - currentTargetPosition.y, elementCenter.x - currentTargetPosition.x) * 180 / Math.PI
-        //console.log(angleToCenter);
+
         var targetButton = "none";
 
-        if (distanceToCenter > element.width()/2) {
+        if (distanceToCenter > keysContainerRadius) {
             clearActiveButtonState();
         } else if (distanceToCenter > centerKeyRadius) {
             switch(true) {
@@ -50,13 +56,15 @@ $(function(){
             $(".center-key").addClass("active");
         }
 
-
-        //console.log(targetButton);
     });
 
     var activeButton = function(index) {
+        var targetButton = $("#keys-box .key:eq("+index+")");
+
+        if (targetButton.hasClass("active")) {return;}
+
         clearActiveButtonState();
-        $("#keys-box .key:eq("+index+")").addClass("active");
+        targetButton.addClass("active");
     };
 
     var clearActiveButtonState = function() {
