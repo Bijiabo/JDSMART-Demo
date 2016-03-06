@@ -25,13 +25,17 @@
 
 <div id="direction-keyboard">
     <div id="keys-container">
-        <div id="keys-box">
-            <div class="shadow"></div>
-            <div class="key" key-name="up" style="border-radius: 100% 0 0 0;"></div>
-            <div class="key" key-name="right" style="border-radius: 0 100% 0 0;"></div>
-            <div class="key" key-name="left" style="border-radius: 0 0 0 100%;"></div>
-            <div class="key" key-name="down" style="border-radius: 0 0 100% 0;"></div>
-            <div class="center-key" key-name="center"></div>
+        <div class="keys-box">
+            <div class="keys-box-shadow"></div>
+            <div class="key key-up animate" key-name="up" style="border-radius: 100% 0 0 0;">
+                <div class="shadow animate"></div>
+            </div>
+            <div class="key key-right animate" key-name="right" style="border-radius: 0 100% 0 0;"></div>
+            <div class="key key-left animate" key-name="left" style="border-radius: 0 0 0 100%;"></div>
+            <div class="key key-down animate" key-name="down" style="border-radius: 0 0 100% 0;">
+                <div class="shadow animate"></div>
+            </div>
+            <div class="center-key animate" key-name="center"></div>
         </div>
     </div>
 </div>

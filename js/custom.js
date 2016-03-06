@@ -216,11 +216,11 @@ _AnnulusRemoteController.prototype.isActiveForButton = function(button) {
 
 _AnnulusRemoteController.prototype.buttonForKeyName = function(keyName) {
     if (isEmptyForString(keyName)) {return [];}
-    return this.keysContainer.find("#keys-box .key[key-name="+keyName+"], .center-key[key-name="+keyName+"]");
+    return this.keysContainer.find(".keys-box .key[key-name="+keyName+"], .center-key[key-name="+keyName+"]");
 };
 
 _AnnulusRemoteController.prototype.clearCurrentActiveButtonState = function() {
-    this.keysContainer.find("#keys-box .key, .center-key").removeClass(this.activeButtonStatusClassName);
+    this.keysContainer.find(".keys-box .key, .center-key").removeClass(this.activeButtonStatusClassName);
 };
 
 _AnnulusRemoteController.prototype.updateCurrentTouchButton = function(element, event) {
